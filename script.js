@@ -285,6 +285,12 @@ document.addEventListener('DOMContentLoaded', function() {
 let isLoggedIn = false;
 let uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
 
+// Filter out past-exams files on initialization
+uploadedFiles = uploadedFiles.filter(file => file.category !== 'past-exams');
+if (uploadedFiles.length !== JSON.parse(localStorage.getItem('uploadedFiles') || '[]').length) {
+    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+}
+
 // Initialize login functionality
 function initializeLogin() {
     const loginBtn = document.getElementById('loginBtn');
@@ -473,8 +479,7 @@ function uploadFile() {
 function addFileToMainPage(fileObj) {
     const categoryMap = {
         'lecture-notes': 'lecture-notes-grid',
-        'homework': 'homework-grid',
-        'past-exams': 'past-exams-grid'
+        'homework': 'homework-grid'
     };
     
     const gridId = categoryMap[fileObj.category];
@@ -565,7 +570,7 @@ function deleteFile(fileId) {
 // Load uploaded files to main page
 function loadUploadedFiles() {
     // Clear existing dynamic content (only cards with data-file-id attribute)
-    const grids = ['lecture-notes-grid', 'homework-grid', 'past-exams-grid'];
+    const grids = ['lecture-notes-grid', 'homework-grid'];
     grids.forEach(gridId => {
         const grid = document.getElementById(gridId);
         if (grid) {
@@ -574,6 +579,13 @@ function loadUploadedFiles() {
             dynamicCards.forEach(card => card.remove());
         }
     });
+    
+    // Filter out past-exams files and update localStorage
+    const filteredFiles = uploadedFiles.filter(file => file.category !== 'past-exams');
+    if (filteredFiles.length !== uploadedFiles.length) {
+        uploadedFiles = filteredFiles;
+        localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+    }
     
     // Add uploaded files
     uploadedFiles.forEach(file => {
